@@ -1,0 +1,5 @@
+#https://github.com/manell/wireshark/blob/master/Dockerfile
+FROM ubuntu
+
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install tshark -y

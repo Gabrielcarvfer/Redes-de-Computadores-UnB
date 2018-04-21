@@ -1,0 +1,156 @@
+version: '2.1'
+
+volumes:
+  maildata:
+    driver: local
+  mailstate:
+    driver: local
+
+services:
+    gateway0:
+      container_name: gateway0
+      mem_limit: 128M
+      build: 
+        context: ./
+        #Look at https://github.com/manell/wireshark for more info
+        dockerfile: Dockerfile_gateway_with_wireshark 
+      volumes:
+        #If you're using Docker Toolbox (with VirtualBox) on Windows, your source folder should be on your User path
+        - /c/Users/Gabriel/pasta_trabalho:/data 
+      command: bash -c "tshark -ni 1 -w /data/output.pcap"
+      privileged: true
+      networks:
+          net1:
+            ipv4_address: 101.1.0.254
+      dns: 101.1.0.10
+
+    app0_dnsserver:
+      #Look at https://github.com/phensley/docker-dns for more info
+      image: phensley/docker-dns
+      domainname: intranet
+      container_name: dns
+      command: --domain intranet
+      mem_limit: 128M
+      networks:
+          net1:
+            ipv4_address: 101.1.0.10
+      volumes:
+          - /var/run/docker.sock:/docker.sock 
+
+
+    app1_mailserver:
+        #Look at https://hub.docker.com/r/tvial/docker-mailserver/ for more info
+        image: tvial/docker-mailserver:latest
+        hostname: mail
+        domainname: intranet
+        mem_limit: 512M
+        container_name: mail
+        ports:
+          - "25:25"
+          - "143:143"
+          - "587:587"
+          - "993:993"
+        volumes:
+          - maildata:/var/mail
+          - mailstate:/var/mail-state
+          - ./config/:/tmp/docker-mailserver/
+        environment:
+          - ENABLE_SPAMASSASSIN=1
+          - ENABLE_CLAMAV=1
+          - ENABLE_FAIL2BAN=1
+          - ENABLE_POSTGREY=1
+          - ONE_DIR=1
+          - DMS_DEBUG=0
+        cap_add:
+          - NET_ADMIN
+          - SYS_PTRACE
+        networks:
+            net1:
+                ipv4_address: 101.1.0.11
+        dns: 101.1.0.10
+        
+    app2_customserver:
+        hostname: pinger
+        domainname: intranet
+        container_name: pinger
+        mem_limit: 128M
+        build: 
+            context: ./
+            dockerfile: Dockerfile_customserver 
+        command: bash -c "sleep 20; ping -c 200 mail.intranet" #start required services
+        networks:
+            net1:
+                ipv4_address: 101.1.0.12 
+        dns: 101.1.0.10
+
+    
+# TODO:
+#    app3_sshserver:
+#        mem_limit: 128M 
+#        build: ./Dockerfile_app3
+#        networks:
+#            net1:
+#                ipv4_address: 101.1.0.13 
+#
+#    app4_customhttpserver:
+#        mem_limit: 128M
+#        build: ./Dockerfile_app4
+#        networks:
+#            net1:
+#                ipv4_address: 101.1.0.14 
+#    
+#    app5_sendandreceivemail:
+#        mem_limit: 128M
+#        build: ./Dockerfile_app4
+#        networks:
+#            net2:
+#                ipv4_address: 101.2.0.10 
+#
+#    app6_dnslookupclient:
+#        mem_limit: 128M
+#        build: ./Dockerfile_app4
+#        networks:
+#            net2:
+#                ipv4_address: 101.2.0.11 
+#
+#    app7_sshclient:
+#        mem_limit: 128M
+#        build: ./Dockerfile_app4
+#        networks:
+#            net2:
+#                ipv4_address: 101.2.0.12 
+#    
+#    app8_customhttpclient:
+#        hostname: host8
+#        mem_limit: 128M
+#        build: ./Dockerfile_app4
+#        networks:
+#            net2:
+#                ipv4_address: 101.2.0.13 
+        
+
+networks:
+    #The bridge driver used below creates a switch for each subnetwork, 
+    # and this switch also serves as a border router, linking the subnetwork to the host network
+
+    net1:
+        # use the bridge driver, but enable IPv6
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 101.1.0.0/24
+                  default-gateway: 101.1.0.254
+                  dns: 101.1.0.10
+
+
+    net2:
+        # use the bridge driver, but enable IPv6
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 101.2.0.0/24
+                  default-gateway: 101.2.0.254
+                  dns: 101.2.0.10
+
