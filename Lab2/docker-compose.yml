@@ -1,5 +1,88 @@
 version: '2.1'
 
+
+
+
+
+
+
+
+# +------------------------+    +------------------------+    +------------------------+    +------------------------+    +------------------------+
+# |                        |    |                        |    |                        |    |                        |    |                        |
+# |    app0_dnsserver      |    |    app1_mailserver     |    |    app2_customserver   |    |  app3_customhttpserver |    |  app4_??????           |
+# | The DNS server         |    | The mail server        |    |  Requests the IP       |    | The DNS server         |    |                        |
+# | receive name requests  |    | receive IMAP/POP/SMTP  |    |  address of the        |    | receive name requests  |    |                        |
+# | (nslookup google.com)  |    | requests to send or    |    |  mail server (app1)    |    | (nslookup google.com)  |    |                        |
+# | and returns the        |    | receive mail           |    |  to the dns server     |    | and returns the        |    |                        |
+# | related IP             |    |                        |    |  (app0)                |    | related IP             |    |                        |
+# |                        |    | hostname mail.intranet |    |                        |    |                        |    |                        |
+# |  IP      101.1.0.10    |    |  IP      101.1.0.11    |    |  IP      101.1.0.12    |    |  IP      101.1.0.13    |    |  IP      101.1.0.14    |
+# |  Netmast 255.255.255.0 |    |  Netmast 255.255.255.0 |    |  Netmast 255.255.255.0 |    |  Netmast 255.255.255.0 |    |  Netmast 255.255.255.0 |
+# |  Gateway 101.1.0.254   |    |  Gateway 101.1.0.254   |    |  Gateway 101.1.0.254   |    |  Gateway 101.1.0.254   |    |  Gateway 101.1.0.254   |
+# |  DNS Server 101.1.0.10 |    |  DNS server 101.1.0.10 |    |  DNS server 101.1.0.10 |    |  DNS server 101.1.0.10 |    |  DNS server 101.1.0.10 |
+# +------------------------+    +------------------------+    +------------------------+    +------------------------+    +------------------------+
+#             |                              |                             |                             |                             |
+#             +------------------------------+--------------+--------------+-----------------------------+-----------------------------+
+#                                                           |
+#                                              +------------------------+
+#                                              |                        |
+#                                              |    gateway0            |
+#                                              | Connects the intranet  |
+#                                              | to the internet or     |
+#                                              | another intranet       |
+#                                              |                        |
+#                                              |                        |
+#                                              |                        |
+#                                              |  IP      101.1.0.254   |
+#                                              |  Netmast 255.255.255.0 |
+#                                              +------------------------+
+#                                                          |
+#                                                          |  
+#                     +------------------------+           |                                                 
+#                     |                        |           |                                                 
+#                     | Docker Virtual adapter |           |                                                 
+#  +----------+       |                        |           |                                                 
+#  |          |       |  Connects to the       |           |                                                 
+#  | Host PC  |       |  internet using a real |-----------+                                                 
+#  |    &     |-------|  network adapter       |           |                                                 
+#  | Internet |       |  through the OS itself |           |                                                 
+#  |          |       |                        |           |                                                 
+#  +----------+       |  IP      192.168.99.1  |           |                                                 
+#                     |  Netmast 255.255.255.0 |           |                                                 
+#                     +------------------------+           |                                                 
+#                                                          |  
+#                                              +------------------------+
+#                                              |                        |
+#                                              |    gateway1            |
+#                                              | Connects the intranet  |
+#                                              | to the internet or     |
+#                                              | another intranet       |
+#                                              |                        |
+#                                              |                        |
+#                                              |                        |
+#                                              |  IP      101.2.0.254   |
+#                                              |  Netmast 255.255.255.0 |
+#                                              +------------------------+
+#                                                           |
+#                                                           |
+#                                                           |
+#             +------------------------------+--------------+--------------+-----------------------------+
+#             |                              |                             |                             |
+# +------------------------+    +------------------------+    +------------------------+    +------------------------+
+# |                        |    |                        |    |                        |    |                        |
+# |    app5_???            |    |    app6_????           |    |    app7_?????          |    |  app8_??????           |
+# |                        |    |                        |    |                        |    |                        |
+# |                        |    |                        |    |                        |    |                        |
+# |                        |    |                        |    |                        |    |                        |
+# |                        |    |                        |    |                        |    |                        |
+# |                        |    |                        |    |                        |    |                        |
+# |                        |    | hostname mail.intranet |    |                        |    |                        |
+# |  IP      101.2.0.10    |    |  IP      101.2.0.11    |    |  IP      101.2.0.12    |    |  IP      101.2.0.13    |
+# |  Netmast 255.255.255.0 |    |  Netmast 255.255.255.0 |    |  Netmast 255.255.255.0 |    |  Netmast 255.255.255.0 |
+# |  Gateway 101.2.0.254   |    |  Gateway 101.2.0.254   |    |  Gateway 101.2.0.254   |    |  Gateway 101.2.0.254   |
+# |  DNS Server 101.2.0.10 |    |  DNS server 101.2.0.10 |    |  DNS server 101.2.0.10 |    |  DNS server 101.2.0.10 |
+# +------------------------+    +------------------------+    +------------------------+    +------------------------+
+
 volumes:
   maildata:
     driver: local
