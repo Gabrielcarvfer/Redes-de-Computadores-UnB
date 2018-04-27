@@ -99,6 +99,8 @@ services:
         dockerfile: Dockerfile_gateway_with_wireshark 
       volumes:
         #If you're using Docker Toolbox (with VirtualBox) on Windows, your source folder should be on your User path
+        #If you're using Linux, chmod a+rwx /my_path to allow external write and sudo chown my_user /my_path/output.pcap
+
         - /c/Users/Gabriel/pasta_trabalho:/data 
       command: bash -c "tshark -ni 1 -w /data/output.pcap"
       privileged: true

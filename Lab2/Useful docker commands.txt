@@ -1,3 +1,6 @@
+#Portainer.io
+#Imagem docker para gerenciar o docker através de interface gráfica Web
+
 #Lista imagens de containers criados
 docker image list
 
