@@ -1,0 +1,9 @@
+FROM ubuntu
+
+#Update packages list
+RUN apt-get update
+
+#Install required packages
+RUN apt-get -y install apt-utils iputils-ping dnsutils python
+
+CMD python -m SimpleHTTPServer 80

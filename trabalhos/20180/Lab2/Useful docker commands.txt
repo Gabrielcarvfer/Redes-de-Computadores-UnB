@@ -1,0 +1,43 @@
+#Portainer.io
+#Imagem docker para gerenciar o docker através de interface gráfica Web
+
+#Lista imagens de containers criados
+docker image list
+
+#Inicia container da imagem como deamon/processo (se fechar terminal, o container continua rodando)
+docker run -d image
+
+#Inicia container da imagem e entra na linha de comando (se fechar o terminal, o container é parado)
+docker run -it image
+
+#Se conectar com um container já em execução
+docker attach <container_name>
+
+#Lista containers em execução, a imagem relacionada, id do container, comando executado no início do container, tempo que o container foi criado e que está ligado, mapeamento de portas, nome do container (usado por outros comandos)
+docker container list
+docker ps
+
+#Inicia container com nome especificado
+docker run <container_name>
+
+#Inicia container com nome especificado e entra na linha de comando dele
+docker start -i <container_name>
+
+#Cria containers orquestrados no arquivo .yml
+docker-compose build
+
+#Cria containeres e os inicia
+docker-compose up
+
+#Inicia serviços dos containeres
+docker-compose start
+
+#Para serviços dos containeres
+docker-compose stop
+
+#Mostra serviços sendo executados
+docker-compose top
+
+#Para serviços, remove conteineres, redes, imagens, volumes, etc
+docker-compose down
+

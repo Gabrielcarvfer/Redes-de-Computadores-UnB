@@ -1,0 +1,6 @@
+1º - Instale o WireShark
+2º - Se usando Windows, instale o NPCAP (https://nmap.org/npcap/). O WinPcap, distribuido por padrão, é desatualizado.
+3º - Execute como administrador o Wireshark e capture a interface de Loopback do Npcap
+4º - Rode o "ExemploSocket.py"
+5º - Verifique o 3-way handshake estabelecendo a conexão TCP 
+6º - Verifique a transmissão das mensagens e a confirmação de seu recebimento
