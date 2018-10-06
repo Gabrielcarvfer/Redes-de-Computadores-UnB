@@ -18,7 +18,7 @@ def processo1():
 
     while 1:
         # transforma mensagem em bytes e transmite
-        sock.send(bytes(mensagem,"utf-8"))
+        sock.send(mensagem.encode(encoding="utf-8"))
         print("Cliente:", mensagem)
         time.sleep(5)
 
@@ -38,7 +38,7 @@ class ServerClient:
         ServerClient.numClients += 1
 
     def sendMsg(self, msg):
-        self.sock.send(bytes(msg, "utf-8"))
+        self.sock.send(msg.encode("utf-8"))
 
 
 class ServerChannel:
@@ -86,7 +86,7 @@ class ServerApp:
 
             while 1:
                 # recebe do socket do cliente (processo 1) uma mensagem de 512 bytes
-                mensagem_recebida = clientsock.recv(512)
+                mensagem_recebida = clientsock.recv(512).decode("utf-8")
 
                 print(mensagem_recebida)
 
@@ -119,7 +119,7 @@ class ServerApp:
                 else:
                     unrecognized_commands += comm_n_args[0]
             else:
-                self.sendMsgChannel(comm_n_args[1:], client.channel)
+                self.sendMsgChannel(command, client.channel)
 
         answer = ""
         if len(unrecognized_commands) > 0:
@@ -130,8 +130,8 @@ class ServerApp:
         return answer
 
     def sendMsgChannel(self, msg, channel):
-        for client in self.canais[channel].clients:
-            client.sendMsg(msg)
+            for client in self.canais[channel].clients:
+                self.clients[client].sendMsg(msg)
 
     def nickClientHandler(self, clientAddr, args):
         pass
