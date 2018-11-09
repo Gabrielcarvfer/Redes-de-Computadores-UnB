@@ -19,7 +19,7 @@ def processo1(id):
 
     while 1:
         # transforma mensagem em bytes e transmite
-        sock.send(bytes(mensagem, "utf-8"))
+        sock.send(mensagem.encode(encoding, "utf-8"))
         print("Cliente id %d: enviou mensagem" % id)
         time.sleep(1)
 
