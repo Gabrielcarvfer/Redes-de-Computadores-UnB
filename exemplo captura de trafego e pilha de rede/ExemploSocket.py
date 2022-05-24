@@ -1,3 +1,22 @@
+#! /usr/bin/env python3
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+#
+# Copyright (c) 2018 Gabriel Ferreira <gabrielcarvfer@gmail.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation;
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
 import socket
 import time
 portaHost = 65000 #porta do servidor (fica escutando esperando conexões)
@@ -13,7 +32,7 @@ def processo1():
     time.sleep(10)
 
     # requisita estabelecimento de conexão
-    sock.connect((socket.gethostname(),portaHost))
+    sock.connect(("172.29.113.125",portaHost))
 
     while 1:
         # transforma mensagem em bytes e transmite
@@ -29,7 +48,7 @@ def processo2():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # requisita ao SO a posse de uma porta associada a um IP
-    sock.bind((socket.gethostname(), portaHost))
+    sock.bind(("172.29.113.125", portaHost))
 
     # requisita ao SO que a porta indicada de um dado IP seja
     #   reservado para escuta
