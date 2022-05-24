@@ -104,7 +104,18 @@ def rpc(func):
 
     return inner
 
-
+# Registers read_file as a RPC call
+# In RPC-land, this results in two stubs
+# a client stub:
+# - that marshals (encodes) the data,
+# - transmits to the server as an RPC request
+# - wait for the RPC response
+# - forward the RPC response back to its caller
+# a server stub:
+# - that unmarshals (decodes) the data,
+# - calls the remote call with the arguments passed
+# - marshals the RPC response
+# - sends the RPC response to the client stub
 @rpc
 async def read_file(filename):
     return "boop"
@@ -122,9 +133,10 @@ async def main():
     # Prepare RPC server on a separate process
     mp.Process(target=rpc_server_init, kwargs={"port": RPC_PORT}, daemon=True).start()
 
-    # Trivial stuff
-    # You call and wait for the response before continuing
+    # Wait a few seconds for the RPC server to be ready
     time.sleep(30)
+
+    # What was supposed to be trivially done locally, is much more complicated when remote
     contents = await waiting_routine("large_file.txt")
     print("Contents of \"large_file_test.txt\" is: ", contents)
 
