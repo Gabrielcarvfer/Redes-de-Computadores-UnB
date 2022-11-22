@@ -20,8 +20,9 @@
 import socket
 import time
 
-portaHost = 65000 #porta do servidor (fica escutando esperando conexões)
-mensagem = "abobrinha" #mensagem a ser enviada
+portaHost = 65000  # porta do servidor (fica escutando esperando conexões)
+mensagem = "abobrinha"  # mensagem a ser enviada
+
 
 def processo1():
     # requisita API do SO uma conexão AF_INET (IPV4)
@@ -33,7 +34,7 @@ def processo1():
     time.sleep(10)
 
     # requisita estabelecimento de conexão
-    sock.connect((socket.gethostname(),portaHost))
+    sock.connect((socket.gethostname(), portaHost))
 
     while 1:
         # transforma mensagem em bytes e transmite
@@ -47,12 +48,12 @@ def processo1():
 class ServerClient:
     numClients = 0
 
-    def __init__(self, ipv4, sock, nickname="USR"+str(numClients), hostname="", channel=""):
-        self.ipv4     = ipv4
-        self.sock     = sock
+    def __init__(self, ipv4, sock, nickname="USR" + str(numClients), hostname="", channel=""):
+        self.ipv4 = ipv4
+        self.sock = sock
         self.nickname = nickname
         self.hostname = hostname
-        self.channel  = channel
+        self.channel = channel
 
         ServerClient.numClients += 1
 
@@ -71,18 +72,16 @@ class ServerApp:
     def __init__(self, portaHost):
         # Cria estruturas para segurar clients e canais
         self.clients = {}
-        self.canais   = {}
-
-        self.canais[""] = ServerChannel("")
+        self.canais = {"": ServerChannel("")}
 
         # registra handlers para comandos
-        self.handlers = {"NICK"   : self.nickClientHandler,
+        self.handlers = {"NICK": self.nickClientHandler,
                          "USUARIO": self.newClientHandler,
-                         "SAIR"   : self.deleteClientHandler,
-                         "ENTRAR" : self.subscribeChannelHandler,
-                         "SAIRC"  : self.unsubscribeChannelHandler,
-                         "LISTAR" : self.listChannelHandler,
-                        }
+                         "SAIR": self.deleteClientHandler,
+                         "ENTRAR": self.subscribeChannelHandler,
+                         "SAIRC": self.unsubscribeChannelHandler,
+                         "LISTAR": self.listChannelHandler,
+                         }
         # requisita API do SO uma conexão AF_INET (IPV4)
         #   com protocolo de transporte SOCK_STREAM (TCP)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -116,17 +115,15 @@ class ServerApp:
         pass
 
     def parseCommands(self, clientsock, clientAddr, mensagem_recebida):
-        commands = mensagem_recebida.split('\n') # comandos separados por nova linha
+        commands = mensagem_recebida.split('\n')  # comandos separados por nova linha
         unrecognized_commands = []
         invalid_parameters = []
-
 
         if clientAddr not in self.clients.keys():
             self.clients[clientAddr] = ServerClient(clientAddr, clientsock)
             self.canais[""].clients[clientAddr] = self.clients[clientAddr]
 
         client = self.clients[clientAddr]
-
 
         for command in commands:
             comm_n_args = command.split(' ')
@@ -149,8 +146,8 @@ class ServerApp:
         return answer
 
     def sendMsgChannel(self, msg, channel):
-            for client in self.canais[channel].clients:
-                self.clients[client].sendMsg(msg)
+        for client in self.canais[channel].clients:
+            self.clients[client].sendMsg(msg)
 
     def nickClientHandler(self, clientAddr, args):
         pass
@@ -168,13 +165,15 @@ class ServerApp:
         pass
 
     def listChannelHandler(self, clientAddr, args):
-        
+
         pass
 
+
 def processo2():
-    #Cria servidor e escuta clients
+    # Cria servidor e escuta clients
     serv = ServerApp(portaHost)
     pass
+
 
 def main():
     import multiprocessing as mp
@@ -190,14 +189,15 @@ def main():
         process.start()
 
     # espera pela finalização dos processos filhos
-    #   (em Sistemas operacionais verão o que isso significa)
+    #   (em Sistemas operacionais, estudarão sobre o assunto)
     for process in processes:
         process.join()
 
     return
 
-# Para evitar dar pau com multiprocessos em python,
+
+# Para evitar dar pau com multi-processos em python,
 #   sempre colocar essa guarda, que evita processos filhos
-#   de executarem a o conteúdo da função
+#   de executarem o conteúdo da função
 if __name__ == '__main__':
     main()

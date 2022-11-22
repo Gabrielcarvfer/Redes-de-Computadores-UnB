@@ -19,8 +19,10 @@
 
 import socket
 import time
-portaHost = 65000 #porta do servidor (fica escutando esperando conexões)
-mensagem = "abobrinha" #mensagem a ser enviada
+
+portaHost = 65000  # porta do servidor (fica escutando esperando conexões)
+mensagem = "abobrinha"  # mensagem a ser enviada
+
 
 def processo1(id):
     # requisita API do SO uma conexão AF_INET (IPV4)
@@ -36,7 +38,7 @@ def processo1(id):
 
     while 1:
         # transforma mensagem em bytes e transmite
-        sock.send(bytes(mensagem,"utf-8"))
+        sock.send(bytes(mensagem, "utf-8"))
         print("Cliente id %d: enviou mensagem" % id)
         time.sleep(1)
 
@@ -44,6 +46,7 @@ def processo1(id):
         answer = sock.recv(10)
 
     pass
+
 
 def processo2():
     # requisita API do SO uma conexão AF_INET (IPV4)
@@ -75,12 +78,10 @@ def processo2():
             mensagem_recebida = client[0].recv(10)
             duration = time.time() - start
 
-            print("Servidor recebe de cliente %s:%d após %.2f segundos" % (client[1][0],client[1][1], duration) )
-
-
-
+            print("Servidor recebe de cliente %s:%d após %.2f segundos" % (client[1][0], client[1][1], duration))
 
     pass
+
 
 def main():
     import multiprocessing as mp
@@ -89,7 +90,7 @@ def main():
     processes += [mp.Process(target=processo2)]
 
     for id in range(1):
-        processes += [mp.Process(target=processo1, args=[id])]
+        processes += [mp.Process(target=processo1, args=(id))]
 
     # inicia os dois processos (pode olhar no gerenciador de tarefas,
     #    que lá estarão
@@ -97,14 +98,15 @@ def main():
         process.start()
 
     # espera pela finalização dos processos filhos
-    #   (em Sistemas operacionais verão o que isso significa)
+    #   (em Sistemas operacionais, aprenderão mais sobre o assunto)
     for process in processes:
         process.join()
 
     return
 
-# Para evitar dar pau com multiprocessos em python,
+
+# Para evitar dar pau com multi processos em python,
 #   sempre colocar essa guarda, que evita processos filhos
-#   de executarem a o conteúdo da função
+#   de executarem o conteúdo da função
 if __name__ == '__main__':
     main()
