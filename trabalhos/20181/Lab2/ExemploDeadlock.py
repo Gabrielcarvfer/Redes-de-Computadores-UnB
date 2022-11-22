@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
+from CriaProcessos import main
 import socket
 import time
 
@@ -75,7 +75,7 @@ def processo2():
 
             # recebe do socket do cliente (processo 1) uma mensagem de 10 bytes
             start = time.time()
-            mensagem_recebida = client[0].recv(10)
+            mensagem_recebida = client[0].recv(9)
             duration = time.time() - start
 
             print("Servidor recebe de cliente %s:%d após %.2f segundos" % (client[1][0], client[1][1], duration))
@@ -83,30 +83,8 @@ def processo2():
     pass
 
 
-def main():
-    import multiprocessing as mp
-    processes = []
-
-    processes += [mp.Process(target=processo2)]
-
-    for id in range(1):
-        processes += [mp.Process(target=processo1, args=(id))]
-
-    # inicia os dois processos (pode olhar no gerenciador de tarefas,
-    #    que lá estarão
-    for process in processes:
-        process.start()
-
-    # espera pela finalização dos processos filhos
-    #   (em Sistemas operacionais, aprenderão mais sobre o assunto)
-    for process in processes:
-        process.join()
-
-    return
-
-
 # Para evitar dar pau com multi processos em python,
 #   sempre colocar essa guarda, que evita processos filhos
 #   de executarem o conteúdo da função
 if __name__ == '__main__':
-    main()
+    main(processo1, processo2)

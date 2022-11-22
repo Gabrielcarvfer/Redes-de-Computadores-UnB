@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
+from CriaProcessos import main
 import socket
 import time
 
@@ -28,10 +28,10 @@ def processo1(id):
     # requisita API do SO uma conexão AF_INET (IPV4)
     #   com protocolo de transporte SOCK_STREAM (TCP)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+    sock.setblocking(True)
     # processo dorme por 10 segundos para evitar
     #   tentar se conectar com servidor antes dele estar iniciado
-    time.sleep(5)
+    time.sleep(10)
 
     # requisita estabelecimento de conexão
     sock.connect((socket.gethostname(), portaHost))
@@ -40,11 +40,7 @@ def processo1(id):
         # transforma mensagem em bytes e transmite
         sock.send(bytes(mensagem, "utf-8"))
         print("Cliente id %d: enviou mensagem" % id)
-        time.sleep(1)
-
-        if id is 1:
-            print("Cliente id 1: Segura essa, servidor blocante")
-            time.sleep(30)
+        time.sleep(10)
 
     pass
 
@@ -73,37 +69,18 @@ def processo2():
         for client in clients.values():
             # recebe do socket do cliente (processo 1) uma mensagem de 10 bytes
             start = time.time()
-            mensagem_recebida = client[0].recv(10)
+            mensagem_recebida = client[0].recv(9)
             duration = time.time() - start
 
-            print("Servidor recebe de cliente %s:%d após %.2f segundos" % (client[1][0], client[1][1], duration))
+            print("Servidor recebe de cliente %s:%d mensagem '%s' após %.2f segundos" % (client[1][0],
+                                                                                         client[1][1],
+                                                                                         mensagem_recebida.decode("utf-8"),
+                                                                                         duration))
     pass
 
 
-def main():
-    import multiprocessing as mp
-    processes = []
-
-    processes += [mp.Process(target=processo2)]
-
-    for id in range(10):
-        processes += [mp.Process(target=processo1, args=id)]
-
-    # inicia os dois processos (pode olhar no gerenciador de tarefas,
-    #    que lá estarão
-    for process in processes:
-        process.start()
-
-    # espera pela finalização dos processos filhos
-    #   (verão mais detalhes sobre isto em Sistemas Operacionais)
-    for process in processes:
-        process.join()
-
-    return
-
-
-# Para evitar dar pau com multiprocessos em python,
+# Para evitar dar pau com multi processos em python,
 #   sempre colocar essa guarda, que evita processos filhos
 #   de executarem o conteúdo da função
 if __name__ == '__main__':
-    main()
+    main(processo1, processo2)

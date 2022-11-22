@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
+from CriaProcessos import main
 import socket
 import time
 
@@ -29,12 +29,14 @@ def processo1(id):
     #   com protocolo de transporte SOCK_STREAM (TCP)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # processo dorme por 10 segundos para evitar
-    #   se conectar com servidor antes desse estar rodando
-    time.sleep(5)
-
     # requisita estabelecimento de conexão
-    sock.connect((socket.gethostname(), portaHost))
+    while True:
+        try:
+            sock.connect((socket.gethostname(), portaHost))
+            break
+        except:
+            # Se o servidor não estiver pronto, durma e tente novamente
+            time.sleep(10)
 
     while 1:
         # transforma mensagem em bytes e transmite
@@ -43,8 +45,8 @@ def processo1(id):
         time.sleep(1)
 
         # recebe confirmação
-        answer = sock.recv(10)
-
+        answer = sock.recv(9)
+        print("Cliente id %d: receveu mensagem '%s'" % (id, answer.decode("utf-8")))
     pass
 
 
@@ -62,7 +64,6 @@ def processo2():
 
     # não blocante
     sock.setblocking(False)
-
     clients = {}
 
     while 1:
@@ -72,58 +73,33 @@ def processo2():
         try:
             (clientsocket, address) = sock.accept()
             clients[address] = (clientsocket, address)
-        except Exception:
-            # meh, não tem requisições para conectar ainda
+        except:
+            # meh, não tem requisições de clientes para se conectar ainda
             pass
 
         for client in clients.values():
-            deuRuim = False
-            while not deuRuim:
-                try:
-                    # envia mensagens previamente enviadas (por exemplo)
-                    client[0].send(bytes(mensagem, "utf-8"))
-                    deuRuim = False
-                except:
-                    # deu pau, tem que transmitir novamente
-                    deuRuim = True
-
             try:
-                # recebe do socket do cliente (processo 1) uma mensagem de 10 bytes
+                # recebe do socket do cliente (processo 1) uma mensagem de 9 bytes
                 start = time.time()
-                mensagem_recebida = client[0].recv(10)
+                mensagem_recebida = client[0].recv(9)
+                if len(mensagem_recebida) == 0:
+                    continue
                 duration = time.time() - start
-                print("Servidor recebe de cliente %s:%d após %.2f segundos" % (client[1][0], client[1][1], duration))
-            except Exception:
-                # meh, não tem 10 bytes para receber
-                pass
+                print("Servidor recebe de cliente %s:%d mensagem '%s' após %.2f segundos" % (client[1][0],
+                                                                                             client[1][1],
+                                                                                             mensagem_recebida.decode("utf-8"),
+                                                                                             duration))
 
+                # envia mensagens previamente enviadas (por exemplo)
+                client[0].send(mensagem_recebida)
+            except:
+                # alguma falha
+                pass
     pass
 
 
-def main():
-    import multiprocessing as mp
-    processes = []
-
-    processes += [mp.Process(target=processo2)]
-
-    for id in range(1):
-        processes += [mp.Process(target=processo1, args=(id))]
-
-    # inicia os dois processos (pode olhar no gerenciador de tarefas,
-    #    que lá estarão
-    for process in processes:
-        process.start()
-
-    # espera pela finalização dos processos filhos
-    #   (em Sistemas operacionais, aprenderão mais sobre o assunto)
-    for process in processes:
-        process.join()
-
-    return
-
-
-# Para evitar dar pau com multi-processos em python,
+# Para evitar dar pau com multi processos em python,
 #   sempre colocar essa guarda, que evita processos filhos
 #   de executarem o conteúdo da função
 if __name__ == '__main__':
-    main()
+    main(processo1, processo2)

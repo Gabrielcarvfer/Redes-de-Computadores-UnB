@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
+from CriaProcessos import main
 import socket
 import time
 
@@ -24,7 +24,7 @@ portaHost = 65000  # porta do servidor (fica escutando esperando conexões)
 mensagem = "abobrinha"  # mensagem a ser enviada
 
 
-def processo1():
+def processo1(id):
     # requisita API do SO uma conexão AF_INET (IPV4)
     #   com protocolo de transporte SOCK_STREAM (TCP)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -127,7 +127,7 @@ class ServerApp:
 
         for command in commands:
             comm_n_args = command.split(' ')
-            if comm_n_args[0][0] is '?':
+            if comm_n_args[0][0] == '?':
                 if comm_n_args[0][1:] in self.handlers.keys():
                     ans = self.handlers[comm_n_args[0][1:]](clientAddr, comm_n_args[1:])
                     if len(ans) > 0:
@@ -175,29 +175,8 @@ def processo2():
     pass
 
 
-def main():
-    import multiprocessing as mp
-    processes = []
-
-    # cria 2 processos, um servidor (processo2) e um cliente (processo1)
-    processes += [mp.Process(target=processo2)]
-    processes += [mp.Process(target=processo1)]
-
-    # inicia os dois processos (pode olhar no gerenciador de tarefas,
-    #    que lá estarão
-    for process in processes:
-        process.start()
-
-    # espera pela finalização dos processos filhos
-    #   (em Sistemas operacionais, estudarão sobre o assunto)
-    for process in processes:
-        process.join()
-
-    return
-
-
-# Para evitar dar pau com multi-processos em python,
+# Para evitar dar pau com multi processos em python,
 #   sempre colocar essa guarda, que evita processos filhos
 #   de executarem o conteúdo da função
 if __name__ == '__main__':
-    main()
+    main(processo1, processo2)
