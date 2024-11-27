@@ -25,7 +25,7 @@
 import socket
 import time
 from concurrent.futures import ThreadPoolExecutor
-
+import sys
 
 class PingServer:
     def __init__(self, bound_address="0.0.0.0", port=3213):
@@ -43,16 +43,19 @@ class PingServer:
 
 def PingClient(server_address="127.0.0.1", server_port=3213, the_message=b"banana"):
     while True:
-        socket_cliente_thread = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        socket_client_thread = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # Configure socket to enable broadcasts on POSIX
+        if sys.platform != "win32":
+            socket_client_thread.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         address = (server_address, server_port)
         print(f"Client sending '{the_message}' to {address}")
-        socket_cliente_thread.sendto(the_message, address)
+        socket_client_thread.sendto(the_message, address)
         if the_message == b"That's all folks":
             break
-        msg, address = socket_cliente_thread.recvfrom(512)
+        msg, address = socket_client_thread.recvfrom(512)
         print(f"Client received '{msg}' from {address}")
         break
-    socket_cliente_thread.close()
+    socket_client_thread.close()
 
 threadPool = ThreadPoolExecutor()
 
@@ -65,7 +68,7 @@ local_network_broadcast_address = ".".join(local_network_broadcast_address)
 
 print(f"Localhost hostname: {localhost_name}")
 print(f"Available addresses: {available_addresses}")
-print(f"Picking whatever starts with 192. : {local_network_address}")
+print(f"Picking whatever starts with 192.168. : {local_network_address}")
 print(f"Local broadcast address: {local_network_broadcast_address}")
 server_port = 3213
 
